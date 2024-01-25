@@ -48,6 +48,7 @@ def register_social_user(provider, email, first_name, last_name):
         login_user=authenticate(email=email, password=settings.SOCIAL_AUTH_PASSWORD)
        
         tokens=login_user.tokens()
+        print('tokens', tokens)
         return {
             'email':login_user.email,
             'full_name':login_user.get_full_name,
