@@ -24,28 +24,42 @@ const handleSubmit = async(e)=>{
 
   
 const response = await axiosInstance.post('http://127.0.0.1:8000/api/login/',logindata)
+console.log(response)
     console.log(response.data)
     const result=response.data
+    //console.log(result)
+        
 
-    const user={
-      'full_name':result.full_name,
-      'email':result.email
-   }
-  
-    if(response.status === 200)
+    alert(result.email)
+    
+
+    if (result.email==='')
     {
+      alert("Email or Password didn't matched please try again")
+        navigate('/login')
+        
 
-      localStorage.setItem('token', JSON.stringify(result.access_token))
-      localStorage.setItem('refresh_token', JSON.stringify(result.refresh_token))
-      localStorage.setItem('user', JSON.stringify(user))
-
-      axiosInstance.defaults.headers['Authorization'] =
-					'JWT ' + localStorage.getItem('token')
-
-    toast.success("Login Successful")
-    alert(result.email+' '+result.access_token) 
-    navigate('/dashboard')
     }
+    else{
+      const user={
+            'full_name':result.full_name,
+            'email':result.email
+         }
+      localStorage.setItem('token', JSON.stringify(result.access_token))
+        localStorage.setItem('refresh_token', JSON.stringify(result.refresh_token))
+        localStorage.setItem('user', JSON.stringify(user))
+  
+        axiosInstance.defaults.headers['Authorization'] =
+            'JWT ' + localStorage.getItem('token')
+  
+      toast.success("Login Successful")
+      alert(result.email+' '+result.access_token) 
+      navigate('/dashboard')
+      return
+
+    }
+
+
 
 }
 

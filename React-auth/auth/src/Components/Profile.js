@@ -76,7 +76,7 @@ const Profile = () => {
     <div className='container'>
        <div>Profile</div>
     <h2> {user && user.full_name}</h2>
-    <h2> {user.email && user.names}</h2>
+    {/* <h2> {user.email && user.names}</h2> */}
     <p style={{textAlign:'center',}}>welcome to your profile</p>
     <button onClick={handleLogout} className='logout-btn'>Logout</button>
 </div>

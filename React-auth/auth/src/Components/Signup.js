@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react'
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios"
 import axiosInstance from '../utils/AxiosInstance';
 import { toast } from "react-toastify";
@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 const Signup = () => {
 
   const navigate=useNavigate()
+  const [searchparams] = useSearchParams()
   const [formdata, setFormdata]=useState({
     email:"",
     first_name:"",
@@ -28,16 +29,21 @@ const handleSubmit =async (e)=>{
 
   const response = await axiosInstance.post('http://127.0.0.1:8000/api/register/',formdata)
   console.log(response.data)
+  console.log('status', response.status)
   const result=response.data
-  if (response.status === 201) {
-     //navigate("/otp/verify")
-     alert(response.data)
-     navigate("/otp/verify")
-     toast.success(result.message)
-  }
+
+  
+    if (response.status === 201) {
+      //navigate("/otp/verify")
+      alert(response.data)
+      alert(response.data.message)
+      navigate("/otp/verify")
+      //toast.success(result.message)
+   }
 
 
-  console.log(formdata)
+
+ console.log(formdata)
  
 }
 
@@ -45,6 +51,13 @@ const handleSubmit =async (e)=>{
 const apiUrl = process.env.REACT_APP_GOOGLECLIENTID;
 
 console.log(apiUrl)
+
+const handleLoginWithGithub =()=>{
+  window.location.assign(`https://github.com/login/oauth/authorize/?client_id=8b8ae1b369644e173db7`)
+}
+
+
+
 
 const handleSigninWithGoogle = async (response)=>{
   const payload=response.credential
@@ -71,9 +84,50 @@ const handleSigninWithGoogle = async (response)=>{
     navigate('/dashboard')
   }
 
-
-
 }
+
+
+
+const  send_github__code_to_server = async()=>{
+  if (searchparams) {
+    alert(searchparams)
+      try {
+        alert('try'+searchparams)
+      const urlparam = searchparams.get('code')  
+      const resp = await axios.post('http://127.0.0.1:8000/socialapi/github/', {'code':urlparam})
+      const result = resp.data
+      console.log('server res: ',result)
+      if (resp.status===200) {
+          const user ={
+          'email':result.email,
+          'names':result.full_name
+      }
+      localStorage.setItem('token', JSON.stringify(result.access_token))
+      localStorage.setItem('refresh_token', JSON.stringify(result.refresh_token))
+      localStorage.setItem('user', JSON.stringify(user))
+      navigate('/dashboard')
+      toast.success('login successful')
+      }
+    } catch (error) {
+      alert(error)
+      if (error.response) {
+          
+          console.log(error.response.data);
+          toast.error(error.response.data.detail)
+        } 
+      }  
+    }
+
+} 
+
+
+let code =searchparams.get('code')
+    useEffect(() => {
+        if (code) {
+          alert('yes')
+           send_github__code_to_server()  
+        }   
+    }, [code])
 
 
 useEffect(() => {
@@ -141,7 +195,7 @@ useEffect(() => {
                 </form>
                  <h3 className='text-option'>Or</h3>
             <div className='githubContainer'>
-                <button>Sign up with Github</button>
+            <button onClick={handleLoginWithGithub}>Sign in with Github</button>
             </div>
             <div className='googleContainer'>
                
