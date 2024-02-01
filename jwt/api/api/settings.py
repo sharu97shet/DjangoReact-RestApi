@@ -135,6 +135,9 @@ GOOGLE_CLIENT_ID=os.environ.get('googleclientid')
 GOOGLE_CLIENT_SECRET=os.environ.get('googleclientsecret')
 SOCIAL_AUTH_PASSWORD=os.environ.get('socialauthpassword')
 
+GITHUB_CLIENT_ID=os.environ.get('githubclientid')
+GITHUB_CLIENT_SECRET=os.environ.get('githubclientsecret')
+
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

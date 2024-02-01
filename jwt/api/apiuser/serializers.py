@@ -9,6 +9,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
 from .utils import send_normal_email
 from rest_framework_simplejwt.tokens import RefreshToken, TokenError
+import re
 
 #jdjt leob kjtw cknt
 
@@ -24,18 +25,31 @@ class UserRegisterSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         password=attrs.get('password', '')
         password2 =attrs.get('password2', '')
+        first_name=attrs.get('first_name', '')
+        last_name =attrs.get('last_name', '')
         if password !=password2:
-            raise serializers.ValidationError("passwords do not match")
+            raise serializers.ValidationError("passwords do not match both should be same")
+        # if first_name==last_name:
+        #     raise serializers.ValidationError("Both Firstname, lastname should not  be same")
+
          
         return attrs
 
     def create(self, validated_data):
+        pattern = r'[^@]+@[^@]+\.[^@]+'
+    
+    # Use the search function to find a match in the email string
+        match = re.search(pattern, validated_data['email'])
+        # if not match:
+        #       raise serializers.ValidationError("Email address should have @")
+        # else:
         user= User.objects.create_user(
-            email=validated_data['email'],
-            first_name=validated_data.get('first_name'),
-            last_name=validated_data.get('last_name'),
-            password=validated_data.get('password')
-            )
+        email=validated_data['email'],
+        first_name=validated_data.get('first_name'),
+        last_name=validated_data.get('last_name'),
+        password=validated_data.get('password')
+        )
+             
         return user
     
 
@@ -66,6 +80,10 @@ class LoginSerializer(serializers.ModelSerializer):
         request=self.context.get('request')
         user = authenticate(request, email=email, password=password)
         if not user:
+            return{
+                'email':"",
+                'password':"password is not correct",
+            }
             raise AuthenticationFailed("invalid credential try again")
         if not user.is_verified:
             raise AuthenticationFailed("Email is not verified")

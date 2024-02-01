@@ -1,6 +1,8 @@
 from django.shortcuts import render , HttpResponse
+from django.utils import timezone
 from .serializers import *
 from .models import * 
+from django.db import connection
 from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
 from .utils import send_code_to_user
@@ -14,6 +16,44 @@ from rest_framework_simplejwt.tokens import RefreshToken
 # Create your views here.
 def home(request):
     return HttpResponse("jwt")
+
+def run(request):
+    rest1=Restaurant()
+    #rest1.objects.delete
+    restrecords=Restaurant.objects.get(id=1)
+    rest=Restaurant.objects.first()
+    print(rest.sales.all())
+    user=User.objects.first()
+    print(restrecords)
+    
+    getcreate=Rating.objects.get_or_create(restaurant=rest,
+                                 user=user, rating=1
+                                 )
+    print(getcreate)
+
+
+    salerecords=Sale.objects.filter(income__range=(3,4.5))
+    print(salerecords.query)
+    print([s.income for s in salerecords])
+
+    
+    # Sale.objects.create(restaurant=Restaurant.objects.first(),income=3.2,datetime=timezone.now())
+
+    # print(restrecords.Rating_set.all())
+   
+
+    #print(connection.queries)
+    # rest1.name="Italian Restaurant #1"
+    # rest1.latitude=50.2
+    # rest1.longitude=50.2
+    # rest1.date_opened=timezone.now()
+    # rest1.restaurant_type=Restaurant.TypeChoices.ITALIAN
+
+    # rest1.save()
+
+
+    return HttpResponse("yes")
+    
 
 
 class  usersotpview(APIView):
@@ -33,6 +73,13 @@ class RegisterView(GenericAPIView):
 
     def post(self, request):
         user = request.data
+        print(request.data['first_name'],request.data['last_name'])
+        if request.data['first_name']==request.data['last_name']:
+             return Response({
+                'data':request.data['first_name'],
+                'message':'Both Firstname, lastname should not  be same'
+            }, status=status.HTTP_201_CREATED)
+
         serializer=self.serializer_class(data=user)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
@@ -43,7 +90,13 @@ class RegisterView(GenericAPIView):
                 'data':user_data,
                 'message':'thanks for signing up a passcode has be sent to verify your email'
             }, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        if not  serializer.is_valid(raise_exception=True):
+              print(serializer.errors)
+              return Response({'data':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
+            
+        
+      
     
 
 class VerifyUserEmail(GenericAPIView):
@@ -69,8 +122,9 @@ class LoginUserView(GenericAPIView):
     serializer_class=LoginSerializer
     def post(self, request):
         serializer= self.serializer_class(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        if serializer.is_valid(raise_exception=True):
+            print('data',serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
     
 
 

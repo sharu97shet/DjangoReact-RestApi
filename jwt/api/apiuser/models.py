@@ -82,9 +82,9 @@ class Restaurant(models.Model):
     def __str__(self):
         return self.name
 
-    # def save(self, *args, **kwargs):
-    #     print(self._state.adding)
-    #     super().save(*args, **kwargs)
+    def save(self, *args, **kwargs):
+        print(self._state.adding)
+        super().save(*args, **kwargs)
 
 
 class Rating(models.Model):
@@ -95,7 +95,7 @@ class Rating(models.Model):
     )
 
     def __str__(self):
-        return f"Rating: {self.rating}"
+        return f"Rating: {self.rating}-{self.restaurant}"
     
 
 class Sale(models.Model):
