@@ -22,19 +22,39 @@ def run(request):
     #rest1.objects.delete
     restrecords=Restaurant.objects.get(id=1)
     rest=Restaurant.objects.first()
-    print(rest.sales.all())
+    #print(rest.sales.all())
     user=User.objects.first()
-    print(restrecords)
+    #print(restrecords)
     
     getcreate=Rating.objects.get_or_create(restaurant=rest,
                                  user=user, rating=1
                                  )
-    print(getcreate)
+    #print(getcreate)
+    
+
+    saledata= Sale.objects.filter(restaurant__restaurant_type=Restaurant.TypeChoices.INDIAN)
+    print(saledata)
 
 
     salerecords=Sale.objects.filter(income__range=(3,4.5))
-    print(salerecords.query)
-    print([s.income for s in salerecords])
+    # print(salerecords.query)
+    # print([s.income for s in salerecords])
+
+    restaurants=Restaurant.objects.prefetch_related('ratings')
+    print(restaurants.query)
+
+    for rest in restaurants:
+        print(rest.name)
+        for ratingrecords in rest.ratings.all():
+            print(ratingrecords.rating)
+
+
+    fivestarratings=Restaurant.objects.prefetch_related('ratings').filter(ratings__rating=5)  
+    print(fivestarratings)
+
+    print(fivestarratings.query) 
+
+
 
     
     # Sale.objects.create(restaurant=Restaurant.objects.first(),income=3.2,datetime=timezone.now())
@@ -52,7 +72,7 @@ def run(request):
     # rest1.save()
 
 
-    return HttpResponse("yes")
+    return Response("yes")
     
 
 

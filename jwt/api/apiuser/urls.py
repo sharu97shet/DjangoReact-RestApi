@@ -1,10 +1,15 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.conf.urls.static import static
+from django.conf import settings
+
+
 from . import views
 from rest_framework_simplejwt.views import (TokenRefreshView)
 
+
 urlpatterns = [
-      path('', views.home, name='index'),
+      path('', views.home, name='index'),   
 
       path('test/', views.run, name='test'),
       path('otpquery/', views.usersotpview.as_view(), name='verify'),
@@ -17,6 +22,7 @@ urlpatterns = [
       path('logout/', views.LogoutView.as_view(), name='logout'),
      # path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
       path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    
-    
-]
+     
+      
+
+]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
