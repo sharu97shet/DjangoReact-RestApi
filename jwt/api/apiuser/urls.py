@@ -12,6 +12,7 @@ urlpatterns = [
       path('', views.home, name='index'),   
 
       path('test/', views.run, name='test'),
+      path('test2/', views.daterecords, name='daterecords'),
       path('otpquery/', views.usersotpview.as_view(), name='verify'),
       path('verify-email/', views.VerifyUserEmail.as_view(), name='verify'),
       path('register/', views.RegisterView.as_view()),

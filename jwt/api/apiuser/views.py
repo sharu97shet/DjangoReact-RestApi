@@ -1,7 +1,9 @@
 from django.shortcuts import render , HttpResponse
 from django.utils import timezone
+from django.db.models.functions import Lower,Upper,Length, Concat
 from .serializers import *
-from .models import * 
+from django.db .models import Max,Min, Avg,Sum, Count,CharField, Value
+from .models import *
 from django.db import connection
 from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
@@ -10,7 +12,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from rest_framework.views import APIView 
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 # Create your views here.
@@ -25,12 +27,12 @@ def run(request):
     #print(rest.sales.all())
     user=User.objects.first()
     #print(restrecords)
-    
+
     getcreate=Rating.objects.get_or_create(restaurant=rest,
                                  user=user, rating=1
                                  )
     #print(getcreate)
-    
+
 
     saledata= Sale.objects.filter(restaurant__restaurant_type=Restaurant.TypeChoices.INDIAN)
     print(saledata)
@@ -49,18 +51,36 @@ def run(request):
             print(ratingrecords.rating)
 
 
-    fivestarratings=Restaurant.objects.prefetch_related('ratings').filter(ratings__rating=5)  
+    fivestarratings=Restaurant.objects.prefetch_related('ratings').filter(ratings__rating=5)
     print(fivestarratings)
 
-    print(fivestarratings.query) 
+    print(fivestarratings.query)
+
+    staff,created=Staff.objects.get_or_create(name='John Doe')
+    print(staff, created)
+
+    #staff.restaurants.set(Restaurant.objects.all()[:3])
+    #staff.restaurants.filter()
+
+    staffrestaurant=Staff.objects.all()
+    print(staff.restaurants.all())
+
+    # StaffRestaurant.objects.create(staff=staff,restaurant=Restaurant.objects.first(),salary=28000)
+
+    # StaffRestaurant.objects.create(staff=staff,restaurant=Restaurant.objects.last(),salary=25000)
+
+    jobs=StaffRestaurant.objects.prefetch_related('restaurant','staff')
+
+    for job in jobs:
+        print(job.restaurant.name, job.restaurant.date_opened, job.salary)
+        print(job.staff.name)
 
 
 
-    
     # Sale.objects.create(restaurant=Restaurant.objects.first(),income=3.2,datetime=timezone.now())
 
     # print(restrecords.Rating_set.all())
-   
+
 
     #print(connection.queries)
     # rest1.name="Italian Restaurant #1"
@@ -72,8 +92,59 @@ def run(request):
     # rest1.save()
 
 
-    return Response("yes")
-    
+    return HttpResponse("yes")
+
+
+def daterecords(request):
+    one_month_ago=timezone.now()-timezone.timedelta(days=31)
+    sales=Sale.objects.filter(datetime__gte=one_month_ago)
+    # print(sales)
+    # print(sales.aggregate(max=Max('income')))
+
+    rests=Restaurant.objects.annotate(len_name=Length('name')).filter(
+     len_name__gt=5  , len_name__lt=11   
+    )
+    # print(rests)
+    # print(rests.query)
+
+    concatenation=Concat('name',Value(' [Rating: '),Avg('ratings__rating'),Value(']'), output_field=CharField())
+
+    restaurants=Restaurant.objects.annotate(message=concatenation)
+
+    print(restaurants)
+
+    #print(restaurants.query)
+
+    for r in restaurants:
+        pass
+        #print(r.message)
+
+    #sumsalesrestaurants=Restaurant.objects.aggregate(sum_sales=Count('sales'))
+
+    sumsalesrestaurants=Restaurant.objects.annotate(salesrecord=Avg('sales__income'))
+    print(sumsalesrestaurants.query)
+
+    for i in sumsalesrestaurants:
+        print(i,1)
+
+    restgroupby= Restaurant.objects.values('restaurant_type').annotate(num_ratings=Count('ratings'))
+
+    print(restgroupby)   
+    print(restgroupby.query)  
+               
+
+    context={
+            'restratings':restaurants,
+            'restsales':sumsalesrestaurants
+
+        }
+
+    #print(sumsalesrestaurants)
+
+    return render(request, "index.html",context)
+    return HttpResponse(one_month_ago)
+
+
 
 
 class  usersotpview(APIView):
@@ -83,7 +154,7 @@ class  usersotpview(APIView):
             print(User.objects.values('is_verified','first_name','last_login','onetimepassword'))
 
             serializer = UserRegisterSerializer(in_active_users, many=True)
-            
+
             return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -105,19 +176,19 @@ class RegisterView(GenericAPIView):
             serializer.save()
             user_data=serializer.data
             send_code_to_user(user_data['email'])
-            
+
             return Response({
                 'data':user_data,
                 'message':'thanks for signing up a passcode has be sent to verify your email'
             }, status=status.HTTP_201_CREATED)
-        
+
         if not  serializer.is_valid(raise_exception=True):
               print(serializer.errors)
               return Response({'data':serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
-            
-        
-      
-    
+
+
+
+
 
 class VerifyUserEmail(GenericAPIView):
     def post(self, request):
@@ -134,8 +205,8 @@ class VerifyUserEmail(GenericAPIView):
             return Response({'message':'passcode is invalid user is already verified'}, status=status.HTTP_204_NO_CONTENT)
         except OneTimePassword.DoesNotExist as identifier:
             return Response({'message':'passcode not provided'}, status=status.HTTP_400_BAD_REQUEST)
-        
-          
+
+
 
 
 class LoginUserView(GenericAPIView):
@@ -145,7 +216,7 @@ class LoginUserView(GenericAPIView):
         if serializer.is_valid(raise_exception=True):
             print('data',serializer.data)
             return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 
 
 class PasswordResetRequestView(GenericAPIView):
@@ -156,7 +227,7 @@ class PasswordResetRequestView(GenericAPIView):
         serializer.is_valid(raise_exception=True)
         return Response({'message':'we have sent you a link to reset your password'}, status=status.HTTP_200_OK)
         # return Response({'message':'user with that email does not exist'}, status=status.HTTP_400_BAD_REQUEST)
-    
+
 
 
 
@@ -181,7 +252,7 @@ class SetNewPasswordView(GenericAPIView):
         serializer=self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
         return Response({'success':True, 'message':"password reset is succesful"}, status=status.HTTP_200_OK)
-    
+
 
 class LogoutView(GenericAPIView):
     serializer_class=LogoutUserSerializer
@@ -215,6 +286,6 @@ class LogoutView(GenericAPIView):
     #     serializer=self.serializer_class(data=request.data)
     #     serializer.is_valid(raise_exception=True)
     #     serializer.save()
-    #     return Response(status=status.HTTP_204_NO_CONTENT) 
+    #     return Response(status=status.HTTP_204_NO_CONTENT)
 
 
