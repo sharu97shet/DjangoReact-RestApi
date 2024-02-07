@@ -4,16 +4,9 @@ Django==4.2.1
 django-cors-headers==4.3.1
 djangorestframework==3.14.0
 djangorestframework-simplejwt==5.3.1
-google-api-core==2.15.0
-google-api-python-client==2.113.0
-google-auth==2.26.2
-google-auth-httplib2==0.2.0
-googleapis-common-protos==1.62.0
 gunicorn==21.2.0
 PyJWT==2.8.0
 python-dotenv==1.0.0
 requests==2.31.0
-rsa==4.9
-sqlparse==0.4.4
-typing_extensions==4.9.0
+
 
