@@ -33,7 +33,7 @@ SECRET_KEY = 'django-insecure-o8p@%=pn!d7r8zmn#6g)kkh0z24i20-(xbab=0io1j4j(8yu3-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['http://127.0.0.1:8000/','.vercel.app', 'onrender.com']
 
 
 # Application definition
@@ -99,6 +99,7 @@ CORS_ALLOW_ALL_ORIGINS=True
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000/",
+    "onrender.com"
 ]
 
 
