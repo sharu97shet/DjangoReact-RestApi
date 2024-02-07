@@ -38,9 +38,8 @@ const handleSubmit =async (e)=>{
       alert(response.data)
       alert(response.data.message)
       navigate("/otp/verify")
-      //toast.success(result.message)
+      toast.success(result.message)
    }
-
 
 
  console.log(formdata)
