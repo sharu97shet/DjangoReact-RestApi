@@ -19,130 +19,130 @@ from rest_framework_simplejwt.tokens import RefreshToken
 def home(request):
     return HttpResponse("jwt")
 
-def run(request):
-    rest1=Restaurant()
-    #rest1.objects.delete
-    restrecords=Restaurant.objects.get(id=1)
-    rest=Restaurant.objects.first()
-    #print(rest.sales.all())
-    user=User.objects.first()
-    #print(restrecords)
+# def run(request):
+#     rest1=Restaurant()
+#     #rest1.objects.delete
+#     restrecords=Restaurant.objects.get(id=1)
+#     rest=Restaurant.objects.first()
+#     #print(rest.sales.all())
+#     user=User.objects.first()
+#     #print(restrecords)
 
-    getcreate=Rating.objects.get_or_create(restaurant=rest,
-                                 user=user, rating=1
-                                 )
-    #print(getcreate)
-
-
-    saledata= Sale.objects.filter(restaurant__restaurant_type=Restaurant.TypeChoices.INDIAN)
-    print(saledata)
+#     getcreate=Rating.objects.get_or_create(restaurant=rest,
+#                                  user=user, rating=1
+#                                  )
+#     #print(getcreate)
 
 
-    salerecords=Sale.objects.filter(income__range=(3,4.5))
-    # print(salerecords.query)
-    # print([s.income for s in salerecords])
-
-    restaurants=Restaurant.objects.prefetch_related('ratings')
-    print(restaurants.query)
-
-    for rest in restaurants:
-        print(rest.name)
-        for ratingrecords in rest.ratings.all():
-            print(ratingrecords.rating)
+#     saledata= Sale.objects.filter(restaurant__restaurant_type=Restaurant.TypeChoices.INDIAN)
+#     print(saledata)
 
 
-    fivestarratings=Restaurant.objects.prefetch_related('ratings').filter(ratings__rating=5)
-    print(fivestarratings)
+#     salerecords=Sale.objects.filter(income__range=(3,4.5))
+#     # print(salerecords.query)
+#     # print([s.income for s in salerecords])
 
-    print(fivestarratings.query)
+#     restaurants=Restaurant.objects.prefetch_related('ratings')
+#     print(restaurants.query)
 
-    staff,created=Staff.objects.get_or_create(name='John Doe')
-    print(staff, created)
-
-    #staff.restaurants.set(Restaurant.objects.all()[:3])
-    #staff.restaurants.filter()
-
-    staffrestaurant=Staff.objects.all()
-    print(staff.restaurants.all())
-
-    # StaffRestaurant.objects.create(staff=staff,restaurant=Restaurant.objects.first(),salary=28000)
-
-    # StaffRestaurant.objects.create(staff=staff,restaurant=Restaurant.objects.last(),salary=25000)
-
-    jobs=StaffRestaurant.objects.prefetch_related('restaurant','staff')
-
-    for job in jobs:
-        print(job.restaurant.name, job.restaurant.date_opened, job.salary)
-        print(job.staff.name)
+#     for rest in restaurants:
+#         print(rest.name)
+#         for ratingrecords in rest.ratings.all():
+#             print(ratingrecords.rating)
 
 
+#     fivestarratings=Restaurant.objects.prefetch_related('ratings').filter(ratings__rating=5)
+#     print(fivestarratings)
 
-    # Sale.objects.create(restaurant=Restaurant.objects.first(),income=3.2,datetime=timezone.now())
+#     print(fivestarratings.query)
 
-    # print(restrecords.Rating_set.all())
+#     staff,created=Staff.objects.get_or_create(name='John Doe')
+#     print(staff, created)
+
+#     #staff.restaurants.set(Restaurant.objects.all()[:3])
+#     #staff.restaurants.filter()
+
+#     staffrestaurant=Staff.objects.all()
+#     print(staff.restaurants.all())
+
+#     # StaffRestaurant.objects.create(staff=staff,restaurant=Restaurant.objects.first(),salary=28000)
+
+#     # StaffRestaurant.objects.create(staff=staff,restaurant=Restaurant.objects.last(),salary=25000)
+
+#     jobs=StaffRestaurant.objects.prefetch_related('restaurant','staff')
+
+#     for job in jobs:
+#         print(job.restaurant.name, job.restaurant.date_opened, job.salary)
+#         print(job.staff.name)
 
 
-    #print(connection.queries)
-    # rest1.name="Italian Restaurant #1"
-    # rest1.latitude=50.2
-    # rest1.longitude=50.2
-    # rest1.date_opened=timezone.now()
-    # rest1.restaurant_type=Restaurant.TypeChoices.ITALIAN
 
-    # rest1.save()
+#     # Sale.objects.create(restaurant=Restaurant.objects.first(),income=3.2,datetime=timezone.now())
+
+#     # print(restrecords.Rating_set.all())
 
 
-    return HttpResponse("yes")
+#     #print(connection.queries)
+#     # rest1.name="Italian Restaurant #1"
+#     # rest1.latitude=50.2
+#     # rest1.longitude=50.2
+#     # rest1.date_opened=timezone.now()
+#     # rest1.restaurant_type=Restaurant.TypeChoices.ITALIAN
+
+#     # rest1.save()
 
 
-def daterecords(request):
-    one_month_ago=timezone.now()-timezone.timedelta(days=31)
-    sales=Sale.objects.filter(datetime__gte=one_month_ago)
-    # print(sales)
-    # print(sales.aggregate(max=Max('income')))
+#     return HttpResponse("yes")
 
-    rests=Restaurant.objects.annotate(len_name=Length('name')).filter(
-     len_name__gt=5  , len_name__lt=11   
-    )
-    # print(rests)
-    # print(rests.query)
 
-    concatenation=Concat('name',Value(' [Rating: '),Avg('ratings__rating'),Value(']'), output_field=CharField())
+# def daterecords(request):
+#     one_month_ago=timezone.now()-timezone.timedelta(days=31)
+#     sales=Sale.objects.filter(datetime__gte=one_month_ago)
+#     # print(sales)
+#     # print(sales.aggregate(max=Max('income')))
 
-    restaurants=Restaurant.objects.annotate(message=concatenation)
+#     rests=Restaurant.objects.annotate(len_name=Length('name')).filter(
+#      len_name__gt=5  , len_name__lt=11   
+#     )
+#     # print(rests)
+#     # print(rests.query)
 
-    print(restaurants)
+#     concatenation=Concat('name',Value(' [Rating: '),Avg('ratings__rating'),Value(']'), output_field=CharField())
 
-    #print(restaurants.query)
+#     restaurants=Restaurant.objects.annotate(message=concatenation)
 
-    for r in restaurants:
-        pass
-        #print(r.message)
+#     print(restaurants)
 
-    #sumsalesrestaurants=Restaurant.objects.aggregate(sum_sales=Count('sales'))
+#     #print(restaurants.query)
 
-    sumsalesrestaurants=Restaurant.objects.annotate(salesrecord=Avg('sales__income'))
-    print(sumsalesrestaurants.query)
+#     for r in restaurants:
+#         pass
+#         #print(r.message)
 
-    for i in sumsalesrestaurants:
-        print(i,1)
+#     #sumsalesrestaurants=Restaurant.objects.aggregate(sum_sales=Count('sales'))
 
-    restgroupby= Restaurant.objects.values('restaurant_type').annotate(num_ratings=Count('ratings'))
+#     sumsalesrestaurants=Restaurant.objects.annotate(salesrecord=Avg('sales__income'))
+#     print(sumsalesrestaurants.query)
 
-    print(restgroupby)   
-    print(restgroupby.query)  
+#     for i in sumsalesrestaurants:
+#         print(i,1)
+
+#     restgroupby= Restaurant.objects.values('restaurant_type').annotate(num_ratings=Count('ratings'))
+
+#     print(restgroupby)   
+#     print(restgroupby.query)  
                
 
-    context={
-            'restratings':restaurants,
-            'restsales':sumsalesrestaurants
+#     context={
+#             'restratings':restaurants,
+#             'restsales':sumsalesrestaurants
 
-        }
+#         }
 
-    #print(sumsalesrestaurants)
+#     #print(sumsalesrestaurants)
 
-    return render(request, "index.html",context)
-    return HttpResponse(one_month_ago)
+#     return render(request, "index.html",context)
+#     return HttpResponse(one_month_ago)
 
 
 
