@@ -31,8 +31,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-o8p@%=pn!d7r8zmn#6g)kkh0z24i20-(xbab=0io1j4j(8yu3-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
+DEBUG = False
+#2Z88YUEQCH0O89CU  A7EBXW8JZ0732V4Q
 ALLOWED_HOSTS = ['127.0.0.1','.vercel.app', 'onrender.com']
 
 
@@ -56,6 +56,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'apiuser.middleware.CustomMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.middleware.common.CommonMiddleware',

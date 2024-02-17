@@ -1,5 +1,6 @@
 from django.shortcuts import render , HttpResponse
 from django.utils import timezone
+from django.db.models import Q , Case ,When 
 from django.db.models.functions import Lower,Upper,Length, Concat
 from .serializers import *
 from django.db .models import Max,Min, Avg,Sum, Count,CharField, Value
@@ -15,6 +16,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
+from itertools import chain
 # Create your views here.
 def home(request):
     return HttpResponse("jwt")
@@ -26,7 +28,8 @@ def run(request):
     rest=Restaurant.objects.first()
     #print(rest.sales.all())
     user=User.objects.first()
-    #print(restrecords)
+
+     #print(restrecords)
 
     getcreate=Rating.objects.get_or_create(restaurant=rest,
                                  user=user, rating=1
@@ -37,10 +40,12 @@ def run(request):
     saledata= Sale.objects.filter(restaurant__restaurant_type=Restaurant.TypeChoices.INDIAN)
     print(saledata)
 
-
     salerecords=Sale.objects.filter(income__range=(3,4.5))
     # print(salerecords.query)
     # print([s.income for s in salerecords])
+
+    combined=saledata.union(salerecords,all=True)
+    print("combined", combined)
 
     restaurants=Restaurant.objects.prefetch_related('ratings')
     print(restaurants.query)
@@ -111,7 +116,7 @@ def daterecords(request):
 
     restaurants=Restaurant.objects.annotate(message=concatenation)
 
-    print(restaurants)
+    #print(restaurants)
 
     #print(restaurants.query)
 
@@ -122,20 +127,45 @@ def daterecords(request):
     #sumsalesrestaurants=Restaurant.objects.aggregate(sum_sales=Count('sales'))
 
     sumsalesrestaurants=Restaurant.objects.annotate(salesrecord=Avg('sales__income'))
-    print(sumsalesrestaurants.query)
+    #print(sumsalesrestaurants.query)
 
     for i in sumsalesrestaurants:
         print(i,1)
 
     restgroupby= Restaurant.objects.values('restaurant_type').annotate(num_ratings=Count('ratings'))
 
-    print(restgroupby)   
-    print(restgroupby.query)  
-               
+    # print(restgroupby)   
+    # print(restgroupby.query) 
+
+    #q objects query to get data 40 days date
+    nameconatin=Q(name__icontains="italian")|Q(name__icontains="indian")
+    recently_opened=Q(date_opened__gt=timezone.now()-timezone.timedelta(days=35))
+    forty=Restaurant.objects.filter(nameconatin|recently_opened) 
+
+    # print('gte',forty)
+    # print("que",forty.query)
+
+    eachratings=Restaurant.objects.annotate(rate=Count('ratings'))
+
+    #print("come", eachratings)
+
+    for a in eachratings:
+        print(a.rate, a.name)
+
+    #case    
+    rests=eachratings.annotate(is_popular=Case(
+        When(rate__gt=1,then=True),
+        default=False
+    ))
+
+    print(rests.filter(is_popular=True))
+
+
 
     context={
             'restratings':restaurants,
-            'restsales':sumsalesrestaurants
+            'restsales':sumsalesrestaurants,
+            'fourtydaysgt':forty
 
         }
 
