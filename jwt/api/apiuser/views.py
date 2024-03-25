@@ -10,7 +10,7 @@ from django.shortcuts import render
 from rest_framework.generics import GenericAPIView
 from .utils import send_code_to_user
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import status ,generics
 from django.utils.encoding import smart_str, DjangoUnicodeDecodeError
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework.views import APIView
@@ -145,6 +145,25 @@ def daterecords(request):
     return render(request, "index.html",context)
     return HttpResponse(one_month_ago)
 
+
+#permission using djnago classes.
+
+class Restaurnat(APIView):
+    # serializer_class = 
+    permission_classes=[IsAuthenticated]
+
+   
+
+    def get(self, request):
+        rest=Restaurant.objects.first()
+        serializer = RestaurantSerializer(Restaurant.objects.filter(id=4), many=True)
+        #serializerobject = RestaurantSerializer(rest, many=True)
+        content = {
+            'status': 'request was permitted',
+            'object':  serializer
+        }
+        return Response(serializer.data)
+    
 
 
 
